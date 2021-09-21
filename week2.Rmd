@@ -1,0 +1,169 @@
+---
+title: "통계 학습 개론 2주차"
+output: html_notebook
+---
+
+## Linear Regression
+ * MASS(Modern Applied Stattistics with S)
+   * https://cran.r-project.org/web/packages/MASS/MASS.pdf
+ * ISRL (an Introduction to Statistical Learning in R)
+   * https://cran.r-project.org/web/packages/ISLR/ISLR.pdf
+```{r}
+library(MASS)
+library(ISLR)
+```
+
+## Boston
+ * The Boston data frame has 506 rows and 14 columns. (on MASS)
+ 
+### The format
+ * This data frame contains the following columns:
+   * `crim` per capita crime rate by town.
+   * `zn` proportion of residential land zoned for lats over 25,000 sq.ft
+   * `indus` proportion of non-retail business acres per town.
+   * `chas` Charles River dummy variable (= 1 if tract bounds river; 0 other wise).
+   * `nox` nitron oxiedes concentration (parts per 10 million).
+   * `rm` average number of rooms per dwelling.
+   * `age` proprtion of owner-occupied units built prior to 1940.
+   * `dis` weighted mean of distances to five Boston employment centres.
+   * `rad` index of accessibility to radial highways.
+   * `tax` full-value property-tax rate per \$10.000
+   * `ptratio` pupil-teacher ratio by twon.
+   * `black` 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.
+   * `lstat` lower status of the population (percent).
+   * `medv` meadian value of owner-occupied homes in \$1000s.
+
+### Target
+ * We want to predict `medv` values from others variables.
+   
+```{r}
+head(Boston)
+```
+
+ * First models to predict medv using lstat (medv = beta_0 + beta_1 * lstat)
+```{r}
+lm.fit <- lm(medv~lstat, data=Boston)
+```
+
+```{r}
+summary(lm.fit)
+```
+
+ * Adj R squared = 0.5432
+ * p-value = 2.2e-16
+ * It means:
+   * medv = beta_0 + beta_1 * lstat model is better than medv = beta_0 model.
+   * but there are many other unexplained predictors.
+
+```{r}
+coefficients(lm.fit)
+```
+
+ * The coefficients of model is the value written above.
+   * medv = 34.55 - 0.95 * lstat
+   
+
+```{r}
+confint(lm.fit)
+```
+
+ * confidence interval of coefficients.
+ 
+```{r}
+predict(lm.fit, data.frame(lstat=c(5, 10, 15)), interval='confidence')
+```
+ * how to predict medv.
+
+```{r}
+summary(lm.fit)
+```
+
+
+```{r}
+attach(Boston)
+```
+ * easy way to use variables from Boston using `attach`.
+
+
+```{r}
+plot(lstat, medv)
+abline(lm.fit, col=2)
+```
+ * visualization
+ 
+```{r}
+plot(predict(lm.fit), rstudent(lm.fit))
+abline(h=0)
+```
+```{r}
+plot(hatvalues(lm.fit))
+identify(hatvalues(lm.fit))
+```
+
+```{r}
+lm.fit <- lm(medv~lstat + age, data=Boston)
+summary(lm.fit)
+```
+
+```{r}
+lm.fit <- lm(medv~., data=Boston)
+summary(lm.fit)
+```
+
+```{r}
+summary(lm.fit)$sigma
+```
+
+### Car
+ * car(Companion to Applied Regression)
+   * https://cran.r-project.org/web/packages/car/car.pdf
+```{r}
+library(car)
+```
+
+
+```{r}
+vif(lm.fit)
+```
+ * VIF(Variance Inflation Factor)
+   * The larger VIF, the greater possibility of multicollinearity.
+   * Rule of thumb : VIF > 5 or VIF > 10 => multicollinearity.
+
+
+```{r}
+lm.fit1 = update(lm.fit, ~.-age)
+summary(lm.fit1)
+```
+
+```{r}
+summary(lm(medv~lstat*age))
+```
+
+```{r}
+lm.fit2 = lm(medv~lstat + I(lstat^2))
+```
+
+
+```{r}
+anova(lm.fit, lm.fit2)
+```
+
+
+```{r}
+lm.fit5 = lm(medv~poly(lstat, 5))
+summary(lm.fit5)
+```
+
+* Quantative
+```{r}
+lm.fit = lm(Sales~.+Income: Advertising + Price:Age, data=Carseats)
+summary(lm.fit)
+```
+
+```{r}
+contrasts(Carseats$ShelveLoc)
+```
+
+
+
+
